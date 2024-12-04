@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor Cartografía BIORESILMED</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            width: 100%;
+            height: calc(100vh - 50px); /* Ajustar altura para dejar espacio al título */
+        }
+        #header {
+            height: 50px;
+            background-color: #4CAF50;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">Visor Cartografía BIORESILMED</div>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Crear el mapa centrado en Baza
+        const map = L.map('map').setView([37.4923, -2.7697], 9.5); // Coordenadas de Baza, zoom inicial 9
+
+        // Añadir una capa base
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Cargar el GeoJSON
+        fetch('punts_mostreig_v2.geojson')
+            .then(response => response.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    pointToLayer: (feature, latlng) => {
+                        // Personalizar la representación de los puntos
+                        return L.circleMarker(latlng, {
+                            radius: 5,
+                            fillColor: "#ff7800",
+                            color: "#000",
+                            weight: 1,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        });
+                    },
+                    onEachFeature: (feature, layer) => {
+                        // Agregar evento click para mostrar id y codi
+                        layer.on('click', () => {
+                            const id = feature.properties.id || 'N/A';
+                            const codi = feature.properties.codi || 'N/A';
+                            alert(`ID: ${id}\nCodi: ${codi}`);
+                        });
+                    }
+                }).addTo(map);
+            })
+            .catch(error => console.error('Error al cargar el GeoJSON:', error));
+    </script>
+</body>
+</html>
+
+
