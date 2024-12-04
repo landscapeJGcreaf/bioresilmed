@@ -24,15 +24,42 @@
             font-size: 1.5rem;
             font-weight: bold;
         }
+        .leaflet-control-home {
+            background: white;
+            width: 34px;
+            height: 34px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            position: absolute;
+            top: 80px; /* Ajusta la posición */
+            left: 10px;
+            z-index: 1000; /* Asegura que el botón esté visible */
+        }
+        .leaflet-control-home:hover {
+            background: #f4f4f4;
+        }
+        .leaflet-control-home i {
+            font-size: 18px;
+            color: #4CAF50;
+        }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 </head>
 <body>
     <div id="header">Visor Cartografía BIORESILMED</div>
     <div id="map"></div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Crear el mapa centrado en Baza
-        const map = L.map('map').setView([37.4923, -2.7697], 9); // Coordenadas de Baza, zoom inicial 9
+        // Configuración inicial del mapa
+        const initialView = [37.4923, -2.7697]; // Coordenadas de Baza
+        const initialZoom = 9; // Zoom inicial
+
+        // Crear el mapa
+        const map = L.map('map').setView(initialView, initialZoom);
 
         // Añadir una capa base
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -66,9 +93,22 @@
                 }).addTo(map);
             })
             .catch(error => console.error('Error al cargar el GeoJSON:', error));
+
+        // Crear el botón de reinicio como un elemento HTML flotante
+        const homeButton = L.DomUtil.create('div', 'leaflet-control-home');
+        homeButton.innerHTML = '<i class="fas fa-home"></i>';
+        homeButton.onclick = function () {
+            map.setView(initialView, initialZoom); // Restablecer vista inicial
+        };
+
+        // Añadir el botón al contenedor del mapa
+        map.getContainer().appendChild(homeButton);
     </script>
 </body>
 </html>
+
+
+
 
 
 
