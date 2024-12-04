@@ -32,7 +32,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // Crear el mapa centrado en Baza
-        const map = L.map('map').setView([37.4923, -2.7697], 9.5); // Coordenadas de Baza, zoom inicial 9
+        const map = L.map('map').setView([37.4923, -2.7697], 9); // Coordenadas de Baza, zoom inicial 9
 
         // Añadir una capa base
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -57,12 +57,11 @@
                         });
                     },
                     onEachFeature: (feature, layer) => {
-                        // Agregar evento click para mostrar id y codi
-                        layer.on('click', () => {
-                            const id = feature.properties.id || 'N/A';
-                            const codi = feature.properties.codi || 'N/A';
-                            alert(`ID: ${id}\nCodi: ${codi}`);
-                        });
+                        // Agregar popup con información
+                        const id = feature.properties.id || 'N/A';
+                        const codi = feature.properties.codi || 'N/A';
+                        const popupContent = `<b>ID:</b> ${id}<br><b>Codi:</b> ${codi}`;
+                        layer.bindPopup(popupContent);
                     }
                 }).addTo(map);
             })
@@ -70,5 +69,6 @@
     </script>
 </body>
 </html>
+
 
 
