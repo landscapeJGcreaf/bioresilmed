@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visor Cartografía BIORESILMED</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <style>
         body {
             margin: 0;
@@ -34,10 +35,7 @@
             justify-content: center;
             cursor: pointer;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-            position: absolute;
-            top: 80px; /* Ajusta la posición */
-            left: 10px;
-            z-index: 1000; /* Asegura que el botón esté visible */
+            margin-top: 5px; /* Separación del control de zoom */
         }
         .leaflet-control-home:hover {
             background: #f4f4f4;
@@ -47,7 +45,6 @@
             color: #4CAF50;
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 </head>
 <body>
     <div id="header">Visor Cartografía BIORESILMED</div>
@@ -62,18 +59,41 @@
         const map = L.map('map').setView(initialView, initialZoom);
 
         // Añadir una capa base
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        const osmBase = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        // Cargar el GeoJSON
-        fetch('punts_mostreig_v2.geojson')
+        // Control de capas base
+        const baseMaps = {
+            "OpenStreetMap": osmBase
+        };
+        L.control.layers(baseMaps).addTo(map);
+
+        // Crear el control personalizado para el botón "Vuelta al Zoom Inicial"
+        const HomeControl = L.Control.extend({
+            options: {
+                position: 'topleft' // Colocar el botón debajo del control de zoom
+            },
+            onAdd: function () {
+                const container = L.DomUtil.create('div', 'leaflet-control-home');
+                container.innerHTML = '<i class="fas fa-home"></i>';
+                container.onclick = function () {
+                    map.setView(initialView, initialZoom); // Restablecer vista inicial
+                };
+                return container;
+            }
+        });
+
+        // Añadir el control personalizado al mapa
+        map.addControl(new HomeControl());
+
+        // Cargar la capa GeoJSON 'punts_mostreig_v2'
+        fetch('data/punts_mostreig_v2.geojson')
             .then(response => response.json())
             .then(data => {
                 L.geoJSON(data, {
                     pointToLayer: (feature, latlng) => {
-                        // Personalizar la representación de los puntos
                         return L.circleMarker(latlng, {
                             radius: 5,
                             fillColor: "#ff7800",
@@ -84,7 +104,6 @@
                         });
                     },
                     onEachFeature: (feature, layer) => {
-                        // Agregar popup con información
                         const id = feature.properties.id || 'N/A';
                         const codi = feature.properties.codi || 'N/A';
                         const popupContent = `<b>ID:</b> ${id}<br><b>Codi:</b> ${codi}`;
@@ -92,20 +111,31 @@
                     }
                 }).addTo(map);
             })
-            .catch(error => console.error('Error al cargar el GeoJSON:', error));
+            .catch(error => console.error('Error al cargar punts_mostreig_v2:', error));
 
-        // Crear el botón de reinicio como un elemento HTML flotante
-        const homeButton = L.DomUtil.create('div', 'leaflet-control-home');
-        homeButton.innerHTML = '<i class="fas fa-home"></i>';
-        homeButton.onclick = function () {
-            map.setView(initialView, initialZoom); // Restablecer vista inicial
-        };
-
-        // Añadir el botón al contenedor del mapa
-        map.getContainer().appendChild(homeButton);
+        // Cargar la capa GeoJSON 'finca_santiaga'
+        fetch('data/finca_santiaga.geojson')
+            .then(response => response.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    style: {
+                        color: "#228B22", // Verde oscuro para los bordes
+                        weight: 2,
+                        fillOpacity: 0 // Sin relleno
+                    },
+                    onEachFeature: (feature, layer) => {
+                        const name = feature.properties.name || 'Finca Santiaga';
+                        layer.bindPopup(`<b>Nombre:</b> ${name}`);
+                    }
+                }).addTo(map);
+            })
+            .catch(error => console.error('Error al cargar finca_santiaga:', error));
     </script>
 </body>
 </html>
+
+
+
 
 
 
