@@ -44,50 +44,38 @@
             font-size: 18px;
             color: #4CAF50;
         }
-        #coordinates {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgb(0, 0, 0);
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 14px;
-            z-index: 1000;
-        }
     </style>
 </head>
 <body>
     <div id="header">Visor Cartografía BIORESILMED</div>
     <div id="map"></div>
-    <div id="coordinates">Latitud: --, Longitud: --</div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // Configuración inicial del mapa
         const initialView = [37.4923, -2.7697]; // Coordenadas de Baza
-        const initialZoom = 9; // Zoom inicial
-
+        const initialZoom = 9.5; // Zoom inicial
+    
         // Crear el mapa
         const map = L.map('map').setView(initialView, initialZoom);
-
+    
         // Crear diferentes "panes" para controlar el orden de las capas
         map.createPane('polygonsPane'); // Pane para polígonos
         map.getPane('polygonsPane').style.zIndex = 400; // Nivel z bajo
         map.createPane('pointsPane'); // Pane para puntos
         map.getPane('pointsPane').style.zIndex = 500; // Nivel z alto
-
+    
         // Añadir una capa base
         const osmBase = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
-
+    
         // Control de capas base
         const baseMaps = {
             "OpenStreetMap": osmBase
         };
         L.control.layers(baseMaps).addTo(map);
-
+    
         // Botón para volver al zoom inicial
         const HomeControl = L.Control.extend({
             options: { position: 'topleft' },
@@ -99,7 +87,7 @@
             }
         });
         map.addControl(new HomeControl());
-
+    
         // Función para cargar y mostrar una capa GeoJSON con puntos circulares rojos y popups con atributos id y codi
         const cargarGeoJSONPuntos = (url) => {
             fetch(url)
@@ -117,8 +105,9 @@
                             });
                         },
                         onEachFeature: (feature, layer) => {
-                            const id = feature.properties?.id || 'Sin ID';
-                            const codi = feature.properties?.codi || 'Sin Codi';
+                            // Verificar si los atributos existen para evitar problemas
+                            const id = feature.properties && feature.properties.id ? feature.properties.id : 'Sin ID';
+                            const codi = feature.properties && feature.properties.codi ? feature.properties.codi : 'Sin Codi';
                             const popupContent = `<b>ID:</b> ${id}<br><b>Codi:</b> ${codi}`;
                             layer.bindPopup(popupContent); // Vincula un popup con la información
                         },
@@ -127,7 +116,7 @@
                 })
                 .catch(error => console.error(`Error al cargar ${url}:`, error));
         };
-
+    
         // Función para cargar y mostrar una capa GeoJSON con polígonos
         const cargarGeoJSONPoligonos = (url) => {
             fetch(url)
@@ -145,18 +134,11 @@
                 })
                 .catch(error => console.error(`Error al cargar ${url}:`, error));
         };
-
-        // Mostrar coordenadas del ratón
-        const coordinatesDiv = document.getElementById('coordinates');
-        map.on('mousemove', (e) => {
-            const { lat, lng } = e.latlng;
-            coordinatesDiv.innerHTML = `Latitud: ${lat.toFixed(5)}, Longitud: ${lng.toFixed(5)}`;
-        });
-
+    
         // Cargar las capas GeoJSON
         // Capas de puntos
         cargarGeoJSONPuntos('data/punts_mostreig_v2.geojson');
-
+        
         // Capas de polígonos
         cargarGeoJSONPoligonos('data/finca_santiaga.geojson');
         cargarGeoJSONPoligonos('data/finca_acicon.geojson');
@@ -166,6 +148,15 @@
         cargarGeoJSONPoligonos('data/finca_canalones_nuevo.geojson');
         cargarGeoJSONPoligonos('data/finca_baza_almendro.geojson');
         cargarGeoJSONPoligonos('data/finca_baza_olivo.geojson');
-    </script>
+    </script>          
 </body>
 </html>
+
+
+
+
+
+
+
+
+
