@@ -64,9 +64,15 @@
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
+        const osmBase1 = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
         // Control de capas base
         const baseMaps = {
-            "OpenStreetMap": osmBase
+            "OpenStreetMap": osmBase,
+            "Open1":osmBase1
         };
         L.control.layers(baseMaps).addTo(map);
 
@@ -95,7 +101,7 @@
                 L.geoJSON(data, {
                     pointToLayer: (feature, latlng) => {
                         return L.circleMarker(latlng, {
-                            radius: 5,
+                            radius: 4,
                             fillColor: "#ff7800",
                             color: "#000",
                             weight: 1,
