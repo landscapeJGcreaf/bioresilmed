@@ -128,7 +128,8 @@
                             weight: 2,
                             fillOpacity: 0.4 // Opacidad uniforme para todas las capas de polígonos
                         },
-                        pane: 'polygonsPane' // Asignar al pane de polígonos
+                        pane: 'polygonsPane', // Asignar al pane de polígonos
+                        interactive: false // Hacer que los polígonos no intercepten clics
                     }).addTo(map);
                 })
                 .catch(error => console.error(`Error al cargar ${url}:`, error));
