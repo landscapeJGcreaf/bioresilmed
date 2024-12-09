@@ -54,89 +54,100 @@
         // Configuración inicial del mapa
         const initialView = [37.4923, -2.7697]; // Coordenadas de Baza
         const initialZoom = 9; // Zoom inicial
-
+    
         // Crear el mapa
         const map = L.map('map').setView(initialView, initialZoom);
-
+    
+        // Crear diferentes "panes" para controlar el orden de las capas
+        map.createPane('polygonsPane'); // Pane para polígonos
+        map.getPane('polygonsPane').style.zIndex = 400; // Nivel z bajo
+        map.createPane('pointsPane'); // Pane para puntos
+        map.getPane('pointsPane').style.zIndex = 500; // Nivel z alto
+    
         // Añadir una capa base
         const osmBase = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
-
-        const osmBase1 = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-
+    
         // Control de capas base
         const baseMaps = {
-            "OpenStreetMap": osmBase,
-            "Open1":osmBase1
+            "OpenStreetMap": osmBase
         };
         L.control.layers(baseMaps).addTo(map);
-
-        // Crear el control personalizado para el botón "Vuelta al Zoom Inicial"
+    
+        // Botón para volver al zoom inicial
         const HomeControl = L.Control.extend({
-            options: {
-                position: 'topleft' // Colocar el botón debajo del control de zoom
-            },
+            options: { position: 'topleft' },
             onAdd: function () {
                 const container = L.DomUtil.create('div', 'leaflet-control-home');
                 container.innerHTML = '<i class="fas fa-home"></i>';
-                container.onclick = function () {
-                    map.setView(initialView, initialZoom); // Restablecer vista inicial
-                };
+                container.onclick = () => map.setView(initialView, initialZoom);
                 return container;
             }
         });
-
-        // Añadir el control personalizado al mapa
         map.addControl(new HomeControl());
-
-        // Cargar la capa GeoJSON 'punts_mostreig_v2'
-        fetch('data/punts_mostreig_v2.geojson')
-            .then(response => response.json())
-            .then(data => {
-                L.geoJSON(data, {
-                    pointToLayer: (feature, latlng) => {
-                        return L.circleMarker(latlng, {
-                            radius: 4,
-                            fillColor: "#ff7800",
-                            color: "#000",
-                            weight: 1,
-                            opacity: 1,
-                            fillOpacity: 0.8
-                        });
-                    },
-                    onEachFeature: (feature, layer) => {
-                        const id = feature.properties.id || 'N/A';
-                        const codi = feature.properties.codi || 'N/A';
-                        const popupContent = `<b>ID:</b> ${id}<br><b>Codi:</b> ${codi}`;
-                        layer.bindPopup(popupContent);
-                    }
-                }).addTo(map);
-            })
-            .catch(error => console.error('Error al cargar punts_mostreig_v2:', error));
-
-        // Cargar la capa GeoJSON 'finca_santiaga'
-        fetch('data/finca_santiaga.geojson')
-            .then(response => response.json())
-            .then(data => {
-                L.geoJSON(data, {
-                    style: {
-                        color: "#228B22", // Verde oscuro para los bordes
-                        weight: 2,
-                        fillOpacity: 0 // Sin relleno
-                    },
-                    onEachFeature: (feature, layer) => {
-                        const name = feature.properties.name || 'Finca Santiaga';
-                        layer.bindPopup(`<b>Nombre:</b> ${name}`);
-                    }
-                }).addTo(map);
-            })
-            .catch(error => console.error('Error al cargar finca_santiaga:', error));
-    </script>
+    
+        // Función para cargar y mostrar una capa GeoJSON con puntos circulares rojos y popups con atributos id y codi
+        const cargarGeoJSONPuntos = (url) => {
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    L.geoJSON(data, {
+                        pointToLayer: (feature, latlng) => {
+                            return L.circleMarker(latlng, {
+                                radius: 5, // Tamaño del punto
+                                fillColor: "#FF0000", // Rojo para el relleno
+                                color: "#000", // Borde negro
+                                weight: 1,
+                                opacity: 1,
+                                fillOpacity: 0.8
+                            });
+                        },
+                        onEachFeature: (feature, layer) => {
+                            // Verificar si los atributos existen para evitar problemas
+                            const id = feature.properties && feature.properties.id ? feature.properties.id : 'Sin ID';
+                            const codi = feature.properties && feature.properties.codi ? feature.properties.codi : 'Sin Codi';
+                            const popupContent = `<b>ID:</b> ${id}<br><b>Codi:</b> ${codi}`;
+                            layer.bindPopup(popupContent); // Vincula un popup con la información
+                        },
+                        pane: 'pointsPane' // Asignar al pane de puntos
+                    }).addTo(map);
+                })
+                .catch(error => console.error(`Error al cargar ${url}:`, error));
+        };
+    
+        // Función para cargar y mostrar una capa GeoJSON con polígonos
+        const cargarGeoJSONPoligonos = (url) => {
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    L.geoJSON(data, {
+                        style: {
+                            color: "#228B22", // Verde oscuro para los bordes
+                            weight: 2,
+                            fillOpacity: 0.4 // Opacidad uniforme para todas las capas de polígonos
+                        },
+                        pane: 'polygonsPane' // Asignar al pane de polígonos
+                    }).addTo(map);
+                })
+                .catch(error => console.error(`Error al cargar ${url}:`, error));
+        };
+    
+        // Cargar las capas GeoJSON
+        // Capas de puntos
+        cargarGeoJSONPuntos('data/punts_mostreig_v2.geojson');
+        
+        // Capas de polígonos
+        cargarGeoJSONPoligonos('data/finca_santiaga.geojson');
+        cargarGeoJSONPoligonos('data/finca_acicon.geojson');
+        cargarGeoJSONPoligonos('data/finca_campocamara.geojson');
+        cargarGeoJSONPoligonos('data/finca_chirivel.geojson');
+        cargarGeoJSONPoligonos('data/finca_canalones_almendro.geojson');
+        cargarGeoJSONPoligonos('data/finca_canalones_nuevo.geojson');
+        cargarGeoJSONPoligonos('data/finca_baza_almendro.geojson');
+        cargarGeoJSONPoligonos('data/finca_baza_olivo.geojson');
+    </script>          
 </body>
 </html>
 
