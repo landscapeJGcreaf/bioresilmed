@@ -65,7 +65,7 @@
     <script>
         // Configuración inicial del mapa
         const initialView = [37.4923, -2.7697]; // Coordenadas de Baza
-        const initialZoom = 9; // Zoom inicial
+        const initialZoom = 10; // Zoom inicial
 
         // Crear el mapa
         const map = L.map('map').setView(initialView, initialZoom);
@@ -137,7 +137,7 @@
                         style: {
                             color: "#228B22", // Verde oscuro para los bordes
                             weight: 2,
-                            fillOpacity: 0.4 // Opacidad uniforme para todas las capas de polígonos
+                            fillOpacity: 0 // Opacidad uniforme para todas las capas de polígonos
                         },
                         pane: 'polygonsPane', // Asignar al pane de polígonos
                         interactive: false // Hacer que los polígonos no intercepten clics
