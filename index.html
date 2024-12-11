@@ -87,17 +87,16 @@
             attribution: 'Tiles © Esri & contributors'
         });
 
-        const cartoVoyager = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            maxZoom: 19,
-            subdomains: 'abcd',
-            attribution: '© OpenStreetMap contributors © CARTO'
+        const esriTopographic = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 20,
+            attribution: 'Tiles © Esri & contributors'
         });
 
         // Control de capas base actualizado
         const baseMaps = {
              "OpenStreetMap": osmBase,
             "Esri World Imagery": esriWorldImagery,
-            "Carto Voyager": cartoVoyager
+            "Esri Topographic": esriTopographic
         };
 
        // Añadir control de capas al mapa
