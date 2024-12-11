@@ -25,6 +25,20 @@
             font-size: 1.5rem;
             font-weight: bold;
         }
+        #selector-container {
+            position: absolute;
+            top: 180px;
+            left: 10px;
+            z-index: 1000;
+            background-color: white;
+            padding: 5px;
+            border-radius: 5px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+        #finca-selector {
+            width: 200px;
+            padding: 5px;
+        }
         .leaflet-control-home {
             background: white;
             width: 34px;
@@ -59,6 +73,11 @@
 </head>
 <body>
     <div id="header">Visor Cartografía BIORESILMED</div>
+    <div id="selector-container">
+        <select id="finca-selector">
+            <option value="">Selecciona una finca</option>
+        </select>
+    </div>
     <div id="map"></div>
     <div id="coordinates">Latitud: --, Longitud: --</div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -143,22 +162,44 @@
         };
 
         // Funció per carregar i mostrar una capa GeoJSON amb polígons
+        const fincas = {};
+        
         const cargarGeoJSONPoligonos = (url) => {
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    L.geoJSON(data, {
-                        style: {
-                            color: "#228B22", // Verd fosc per als límits
-                            weight: 2,
-                            fillOpacity: 0 // Opacidad
-                        },
-                        pane: 'polygonsPane', // Asignar al pane de polígons
-                        interactive: false // Per fer que els polígons no intercepten clics
-                    }).addTo(map);
-                })
-                .catch(error => console.error(`Error al cargar ${url}:`, error));
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            L.geoJSON(data, {
+                style: {
+                    color: "#228B22", // Verde oscuro para los límites
+                    weight: 2,
+                    fillOpacity: 0 // Opacidad
+                },
+                pane: 'polygonsPane', // Asignar al pane de polígonos
+                onEachFeature: (feature, layer) => {
+                    const nombreFinca = feature.properties?.nombre || 'Sin Nombre';
+                    const bounds = layer.getBounds(); // Obtener los límites del polígono
+
+                    // Agregar finca al selector
+                    const selector = document.getElementById('finca-selector');
+                    const option = document.createElement('option');
+                    option.value = nombreFinca;
+                    option.textContent = nombreFinca;
+                    selector.appendChild(option);
+
+                    // Guardar los límites en un objeto global
+                    fincas[nombreFinca] = bounds;
+                },
+                interactive: false // Para evitar que los polígonos intercepten clics
+            }).addTo(map);
+         })
+        .catch(error => console.error(`Error al cargar ${url}:`, error));
         };
+        document.getElementById('finca-selector').addEventListener('change', (event) => {
+            const fincaName = event.target.value;
+            if (fincaName && fincas[fincaName]) {
+                map.fitBounds(fincas[fincaName]);
+            }
+        });
 
         // Mostrar coordenades del ratolí
         const coordinatesDiv = document.getElementById('coordinates');
