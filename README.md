@@ -5,7 +5,6 @@ GeoNode template project. Generates a django project with GeoNode support.
 ## Table of Contents
 
 -  [Quick Docker Start](#quick-docker-start)
--  [Developer Workshop](#developer-workshop)
 -  [Create a custom project](#create-a-custom-project)
 -  [Start your server using Docker](#start-your-server-using-docker)
 -  [Run the instance in development mode](#run-the-instance-in-development-mode)
@@ -61,14 +60,6 @@ The project can also be generated from a local checkout of the goenode-project r
   docker compose build
   docker compose up -d
 ```
-
-## Developer Workshop
-
-Available at
-
-  ```bash
-    http://geonode.org/dev-workshop
-  ```
 
 ## Create a custom project
 
